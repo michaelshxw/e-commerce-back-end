@@ -6,13 +6,65 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 // get all products
 router.get('/', (req, res) => {
   // find all products
-  // be sure to include its associated Category and Tag data
+  Product.findAll({
+    include: [
+      {
+        model: Category,
+        attributes: ['category_name']
+      },
+      {
+        model: Tag,
+        attributes: ['tag_name']
+      }
+    ]
+  })
+    .then(categoryData => {
+      if (!categoryData) {
+        res.status(404).json({ message: "Error: no categories found. Please check to see if you have seeded your database. Then try again." });
+        return;
+      }
+      //otherwise, send the data in json
+      res.json(categoryData)
+    })
+    //if there's an error, console log error, throw status 500 with json text error
+    .catch(error => {
+      console.log(error);
+      res.status(500).json(error)
+    })
 });
+// be sure to include its associated Category and Tag data
 
 // get one product
 router.get('/:id', (req, res) => {
   // find a single product by its `id`
   // be sure to include its associated Category and Tag data
+  //find one
+  Product.findOne({
+    //where the id matches the id in the url
+    where: {
+      id: req.params.id
+    },
+    //in the product model in the category_id column
+    include: [
+      {
+        model: Category,
+        attributes: ['name']
+      },
+      {
+        model: Tag,
+        attrucutes: ['tag_name']
+      }
+    ]
+  })
+    //then respond with the category data in json format
+    .then(ProductData =>
+      res.json(ProductData)
+    )
+    //if there's an error, console log error, throw status 500 with json text error
+    .catch(error => {
+      console.log(error);
+      res.status(500).json(error)
+    })
 });
 
 // create new product
@@ -91,6 +143,23 @@ router.put('/:id', (req, res) => {
 
 router.delete('/:id', (req, res) => {
   // delete one product by its `id` value
+  Product.destroy({
+    where: {
+      id: req.params.id
+    }
+  })
+  .then(ProductData => {
+    if(!ProductData) {
+      //respond with status 404 resouce cannot be found and error message
+      res.status(404).json({ message: 'No Product found with that ID.' })
+      return;
+    }
+    res.json(ProductData);
+  })
+  .catch(error => {
+    console.log(error);
+    res.status(500).json(error)
+  })
 });
 
 module.exports = router;
