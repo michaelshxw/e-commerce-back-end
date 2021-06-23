@@ -20,7 +20,7 @@ router.get('/', (req, res) => {
   })
     .then(categoryData => {
       if (!categoryData) {
-        res.status(404).json({ message: "Error: no categories found. Please check to see if you have seeded your database. Then try again." });
+        res.status(404).json({ message: "Error: no products found. Please check to see if you have seeded your database. Then try again." });
         return;
       }
       //otherwise, send the data in json
